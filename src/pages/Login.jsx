@@ -72,7 +72,7 @@ export default function Login() {
   
         {/* Aesthetic soft gradient title like Photogram */}
         <h2 className="text-3xl font-bold text-center bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent mb-6 font-[Poppins]">
-          Photogram
+          Teen Talks
         </h2>
   
         {/* Email/Password Login */}
