@@ -61,15 +61,9 @@ const ProfilePage = () => {
     
             {/* Action Buttons */}
             <div className="flex gap-3 mt-6">
-              <button className="p-2 bg-gray-100 rounded-xl shadow hover:bg-gray-200">
-                <Star size={18} />
-              </button>
-              <button className="p-2 bg-gray-100 rounded-xl shadow hover:bg-gray-200">
-                <MessageCircle size={18} />
-              </button>
-              <button className="px-6 py-2 bg-blue-500 text-white rounded-xl shadow hover:bg-blue-600">
-                Follow
-              </button>
+              
+              
+              
             </div>
           </div>
         </div>
