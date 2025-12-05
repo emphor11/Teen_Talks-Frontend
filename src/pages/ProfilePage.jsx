@@ -128,13 +128,13 @@ const ProfilePage = () => {
                   <>
                     {post.media_url.endsWith(".mp4") ? (
                       <video
-                        src={`https://teen-talks-backend.onrender.com/api/v1${post.media_url}`}
+                        src={`http://localhost:3000/api/v1${post.media_url}`}
                         controls
                         className="w-full aspect-square object-cover"
                       />
                     ) : (
                       <img
-                        src={`https://teen-talks-backend.onrender.com/api/v1${post.media_url}`}
+                        src={`http://localhost:3000/api/v1${post.media_url}`}
                         alt=""
                         className="w-full aspect-square object-cover"
                       />

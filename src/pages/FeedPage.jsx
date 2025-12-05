@@ -26,7 +26,7 @@ const FeedPage = () => {
     const fetchFeed = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch("https://teen-talks-backend.onrender.com/api/v1/posts/feed", {
+        const res = await fetch("http://localhost:3000/api/v1/posts/feed", {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -281,13 +281,13 @@ const FeedPage = () => {
                   {post.media_url && (
                     post.media_url.endsWith(".mp4") ? (
                       <video
-                        src={`https://teen-talks-backend.onrender.com/api/v1${post.media_url}`}
+                        src={`http://localhost:3000/api/v1${post.media_url}`}
                         controls
                         className="w-full aspect-square object-cover bg-black"
                       />
                     ) : (
                       <img
-                        src={`https://teen-talks-backend.onrender.com/api/v1${post.media_url}`}
+                        src={`http://localhost:3000/api/v1${post.media_url}`}
                         className="w-full aspect-square object-cover"
                       />
                     )
