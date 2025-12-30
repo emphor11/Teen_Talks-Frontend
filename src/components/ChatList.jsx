@@ -16,8 +16,8 @@ export default function ChatList({ conversations, onSelectConversation }) {
   }
 
   return (
-    <div className="bg-white shadow-lg rounded-2xl overflow-hidden p-4 w-full max-w-sm">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">
+    <div className="bg-[#282828]/50 shadow-lg rounded-2xl overflow-hidden p-4 w-full max-w-sm">
+      <h2 className="text-lg font-semibold text-white font-[Avenir] mb-4 border-b pb-2">
         Chats
       </h2>
 
@@ -33,7 +33,7 @@ export default function ChatList({ conversations, onSelectConversation }) {
             <div
               key={conv.id}
               onClick={() => onSelectConversation(conv)}
-              className="flex items-center gap-3 p-3 rounded-xl hover:bg-pink-100 transition cursor-pointer"
+              className="flex items-center gap-3 p-3 rounded-xl hover:bg-[#FFFD02] hover:text-black transition cursor-pointer"
             >
               <img
                 src={"/default-avatar.png"}
@@ -41,8 +41,8 @@ export default function ChatList({ conversations, onSelectConversation }) {
                 className="w-10 h-10 rounded-full border border-gray-300 object-cover"
               />
 
-              <div className="flex-1">
-                <h3 className="font-medium text-gray-700">{partner?.name}</h3>
+              <div className="flex-1 ">
+                <h3 className="font-medium text-white hover:text-black  font-[Avenir]">{partner?.name}</h3>
                 <p className="text-sm text-gray-500 truncate">
                   {conv.last_message || "No messages yet"}
                 </p>

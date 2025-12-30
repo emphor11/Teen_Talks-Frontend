@@ -94,8 +94,8 @@ export default function ChatPage() {
   const partner = getPartnerInfo(selectedConversation);
 
   return (
-    <div className="flex h-screen">
-      <div className="w-1/3 border-r border-gray-200">
+    <div className="flex   h-screen ">
+      <div className="w-1/3 flex justify-center items-center bg-[#1c1c1c]">
         <ChatList
           conversations={conversations}
           onSelectConversation={setSelectedConversation}

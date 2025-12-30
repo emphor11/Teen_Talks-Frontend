@@ -68,7 +68,7 @@ const LikeButton = ({ postId, initialLiked = false, initialCount = 0 }) => {
       ) : (
         <HeartOutline className="w-4 h-4 text-gray-700" />
       )}
-      <span className="text-sm text-gray-800 font-medium">
+      <span className="text-sm text-white font-medium">
         {likeCount || 0} Likes
       </span>
       

@@ -2,6 +2,7 @@ import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import { AuthContext } from "../context/AuthContext";
+import loginBG from "../assets/loginBG.jpg"
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -67,11 +68,17 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-gray-50 to-white">
-      <div className="w-full max-w-sm bg-white shadow-lg rounded-2xl p-8 border border-gray-100">
+    <div  className="fixed inset-0 -z-20 min-h-screen flex items-center justify-center "
+            style={{
+              backgroundImage: `url(${loginBG})`,
+              backgroundSize: "cover",
+              backgroundPosition: "top center",
+              backgroundRepeat: "no-repeat",
+            }}>
+      <div className="w-full max-w-sm bg-white shadow-lg bg-gradient-to-r from-[#343434] to-[#242424] justify-center rounded-2xl p-8 border border-black">
   
         {/* Aesthetic soft gradient title like Photogram */}
-        <h2 className="text-3xl font-bold text-center bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent mb-6 font-[Poppins]">
+        <h2 className="text-3xl font-bold text-center bg-white bg-clip-text text-transparent mb-6 font-[Avenir]">
           Teen Talks
         </h2>
   
@@ -82,7 +89,7 @@ export default function Login() {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="border border-gray-300 p-3 rounded-xl text-sm outline-none focus:border-pink-400 focus:ring-2 focus:ring-pink-200 transition"
+            className="border border-gray-300 p-3 font-[Avenir] rounded-xl text-sm outline-none focus:border-black focus:ring-2 focus:ring-black transition"
           />
   
           <input
@@ -90,13 +97,13 @@ export default function Login() {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="border border-gray-300 p-3 rounded-xl text-sm outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-200 transition"
+            className="border font-[Avenir] border-gray-300 p-3 rounded-xl text-sm outline-none focus:border-black focus:ring-2 focus:ring-black transition"
           />
   
           <button
             type="submit"
             disabled={loading}
-            className={`bg-gradient-to-r from-pink-500 to-purple-500 text-white font-medium rounded-xl py-2 text-sm shadow-md ${
+            className={`bg-black text-white font-bold font-[Avenir] rounded-xl py-2 text-sm shadow-md ${
               loading ? "opacity-70" : "hover:opacity-90"
             } transition`}
           >
@@ -112,11 +119,11 @@ export default function Login() {
           />
         </div>
   
-        <p className="text-center text-gray-600 mt-6 text-sm">
+        <p className="text-center text-gray-400 mt-6 text-sm font-[Avenir]">
           Don’t have an account?{" "}
           <span
             onClick={() => navigate("/signup")}
-            className="text-purple-600 font-medium hover:underline cursor-pointer"
+            className="text-white font-medium font-[Avenir] hover:underline cursor-pointer"
           >
             Sign up
           </span>

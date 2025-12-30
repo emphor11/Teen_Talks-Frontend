@@ -5,7 +5,10 @@ import LikeButton from "../components/LikeButton";
 import FollowButton from "../components/FollowButton";
 import { useNavigate } from "react-router-dom";
 import { startConversation } from "../services/chatAPI";
-import { ChatBubbleOvalLeftIcon as ChatBubbleSolid } from "@heroicons/react/24/solid";
+import { ChatBubbleOvalLeftIcon } from "@heroicons/react/24/outline";
+import TopNav from "../components/TopNav";
+
+import feedBg from "../assets/feed-bg.jpg";
 
 const FeedPage = () => {
   const [allPosts, setAllPosts] = useState([]);
@@ -16,325 +19,278 @@ const FeedPage = () => {
   const [isStartingChat, setIsStartingChat] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+
   const observer = useRef();
   const navigate = useNavigate();
-
   const POSTS_PER_PAGE = 5;
 
-  // 📰 Fetch feed posts
+  /* ================= FETCH FEED ================= */
   useEffect(() => {
     const fetchFeed = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const res = await fetch("http://localhost:3000/api/v1/posts/feed", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        console.log("Fetched posts:", data);
-        setAllPosts(data);
-        setDisplayedPosts(data.slice(0, POSTS_PER_PAGE));
-        if (data.length <= POSTS_PER_PAGE) {
-          setHasMore(false);
-        }
-      } catch (err) {
-        console.error("Feed error:", err);
-      }
+      const token = localStorage.getItem("token");
+      const res = await fetch("https://teen-talks-backend.onrender.com/api/v1/posts/feed", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      setAllPosts(data);
+      setDisplayedPosts(data.slice(0, POSTS_PER_PAGE));
+      if (data.length <= POSTS_PER_PAGE) setHasMore(false);
     };
     fetchFeed();
   }, []);
 
-  // Infinite Scroll Logic
-  const lastPostElementRef = useCallback(node => {
-    if (isLoadingMore) return;
-    if (observer.current) observer.current.disconnect();
-    observer.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && hasMore) {
-        console.log("Observer triggered. Visible. Loading more...");
-        setIsLoadingMore(true);
-        setTimeout(() => {
-          setDisplayedPosts(prevPosts => {
-            const currentLength = prevPosts.length;
-            console.log(`Current displayed: ${currentLength}, Total: ${allPosts.length}`);
-            const nextPosts = allPosts.slice(currentLength, currentLength + POSTS_PER_PAGE);
-            if (currentLength + nextPosts.length >= allPosts.length) {
-              setHasMore(false);
-            }
-            return [...prevPosts, ...nextPosts];
-          });
-          setIsLoadingMore(false);
-        }, 1500); // 1.5 second delay
-      }
-    });
-    if (node) observer.current.observe(node);
-  }, [hasMore, allPosts, isLoadingMore]);
+  /* ================= INFINITE SCROLL ================= */
+  const lastPostElementRef = useCallback(
+    (node) => {
+      if (isLoadingMore) return;
+      if (observer.current) observer.current.disconnect();
 
-
-  // 💬 Start a chat with the searched user
-  const handleChatClick = async (receiverId) => {
-    try {
-      setIsStartingChat(true);
-      const res = await startConversation(receiverId);
-      if (res.conversation?.id) {
-        navigate(`/chat/${res.conversation.id}`);
-      } else {
-        console.error("No conversation returned:", res);
-      }
-    } catch (err) {
-      console.error("Start chat error:", err);
-    } finally {
-      setIsStartingChat(false);
-    }
-  };
-
-  // 🔍 Search for a user
-  const handleSearch = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(`https://teen-talks-backend.onrender.com/api/v1/users/${searchId}`, {
-        headers: { Authorization: `Bearer ${token}` },
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          setIsLoadingMore(true);
+          setTimeout(() => {
+            setDisplayedPosts((prev) => {
+              const next = allPosts.slice(
+                prev.length,
+                prev.length + POSTS_PER_PAGE
+              );
+              if (prev.length + next.length >= allPosts.length) {
+                setHasMore(false);
+              }
+              return [...prev, ...next];
+            });
+            setIsLoadingMore(false);
+          }, 1200);
+        }
       });
-      const data = await res.json();
-      if (res.ok) setSearchedUser(data.user);
-      else alert(data.message || "User not found");
-    } catch (err) {
-      console.error("Search error:", err);
-    }
+
+      if (node) observer.current.observe(node);
+    },
+    [hasMore, isLoadingMore, allPosts]
+  );
+
+  /* ================= ACTIONS ================= */
+  const toggleComments = (id) => {
+    setExpandedPost(expandedPost === id ? null : id);
   };
 
-  // 💬 Toggle comments for a post
-  const toggleComments = (postId) => {
-    setExpandedPost(expandedPost === postId ? null : postId);
+  const handleSearch = async () => {
+    const token = localStorage.getItem("token");
+    const res = await fetch(
+      `https://teen-talks-backend.onrender.com/api/v1/users/${searchId}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    const data = await res.json();
+    if (res.ok) setSearchedUser(data.user);
+  };
+
+  const handleChatClick = async (receiverId) => {
+    setIsStartingChat(true);
+    const res = await startConversation(receiverId);
+    navigate(`/chat/${res.conversation.id}`);
+    setIsStartingChat(false);
   };
 
   return (
-    <div className="min-h-screen bg-white px-4 py-8">
-      {/* Page Title */}
-      <h1 className="text-3xl font-bold text-center text-gray-900 mb-10 tracking-tight">
-        Your Feed
-      </h1>
+    <>
+      {/* ================= FIXED BACKGROUND ================= */}
+      <div
+        className="fixed inset-0 -z-20"
+        style={{
+          backgroundImage: `url(${feedBg})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          backgroundAttachment: "fixed",
+        }}
+      />
+      <TopNav/>
 
-      {/* ---------------- MAIN LAYOUT: 2 COLUMNS ---------------- */}
-      <div className="flex gap-8 ">
+      {/* ================= CONTENT ================= */}
+      <div className="relative min-h-screen px-6 py-12 text-white">
 
-        {/* ---------------- LEFT SIDEBAR ---------------- */}
-        <div className="w-80 space-y-6">
+        {/* PAGE TITLE */}
+        <h1 className="text-4xl font font-[Avenir] text-center mb-16 tracking-tight">
+          Discover
+          <span className="block w-20 h-[2px] bg-yellow-500 mx-auto mt-4 rounded-full" />
+        </h1>
 
-          {/* Search User Box */}
-          <div className="bg-white border border-gray-200 p-5 rounded-2xl shadow-sm">
-            <h2 className="font-semibold text-gray-800 mb-3 text-lg">
-              Search for a user 🔍
-            </h2>
+        <div className="flex gap-12 max-w-7xl mx-auto">
 
-            <div className="flex gap-3">
-              <input
-                type="text"
-                placeholder="Enter user ID"
-                value={searchId}
-                onChange={(e) => setSearchId(e.target.value)}
-                className="flex-1 border border-gray-300 rounded-xl px-4 py-3 text-sm
-                        focus:ring-2 focus:ring-pink-300 outline-none"
-              />
-
-              <button
-                onClick={handleSearch}
-                className="bg-gradient-to-r from-pink-500 to-purple-500 text-white 
-                        px-2 py-1 rounded-xl font-semibold shadow-md 
-                        hover:scale-105 transition-all duration-300"
-              >
-                Search
-              </button>
-            </div>
-          </div>
-
-          {/* Searched User Result */}
-          {searchedUser && (
-            <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
-              <h3 className="text-lg font-semibold text-gray-900">
-                {searchedUser.name}
-              </h3>
-              <p className="text-gray-500 text-sm mb-4">
-                {searchedUser.email}
-              </p>
+          {/* ================= LEFT SIDEBAR ================= */}
+          <aside className="w-80 space-y-6 sticky top-24 self-start">
+            <div className="bg-[#141414]/80 backdrop-blur-sm border border-white/10 p-6 rounded-2xl">
+              <h2 className="text-lg font  mb-4 text-yellow-400">
+                Find People
+              </h2>
 
               <div className="flex gap-3">
-                <button
-                  onClick={() => handleChatClick(searchedUser.id)}
-                  disabled={isStartingChat}
-                  className={`px-5 py-2.5 rounded-full text-white text-sm font-semibold transition 
-                    ${isStartingChat
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-pink-500 hover:bg-pink-600"
-                    }`}
-                >
-                  {isStartingChat ? "Starting…" : "Chat"}
-                </button>
-
-                <FollowButton
-                  userId={searchedUser.id}
-                  token={localStorage.getItem("token")}
+                <input
+                  value={searchId}
+                  onChange={(e) => setSearchId(e.target.value)}
+                  placeholder="#Explore"
+                  className="flex-1 bg-[#0f0f0f] border border-white/10 rounded-xl px-4 py-2 text-sm outline-none focus:border-yellow-500"
                 />
+
+                <button
+                  onClick={handleSearch}
+                  className="bg-[#FFFD02] text-black px-4 py-2 rounded-xl font-medium font-[Avenir] hover:bg-yellow-400 transition"
+                >
+                  Search
+                </button>
               </div>
             </div>
-          )}
-        </div>
 
-        {/* ---------------- FEED RIGHT SIDE ---------------- */}
-        <div className="max-w-2xl w-full space-y-8">
-          {displayedPosts.map((post, index) => {
-            if (displayedPosts.length === index + 1) {
-              return (
-                <div
-                  ref={lastPostElementRef}
-                  key={post.id}
-                  className="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden"
-                >
-                  {/* HEADER */}
-                  <div className="flex items-center justify-between px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gray-200" />
-                      <div>
-                        <h3 className="font-semibold text-gray-900 text-sm">{post.author}</h3>
-                        <p className="text-xs text-gray-500">
-                          {new Date(post.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
+            {searchedUser && (
+              <div className="bg-[#141414]/80 backdrop-blur-sm border border-white/10 p-6 rounded-2xl">
+                <h3 className="font-semibold">{searchedUser.name}</h3>
+                <p className="text-sm text-gray-400 mb-4">
+                  {searchedUser.email}
+                </p>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => handleChatClick(searchedUser.id)}
+                    disabled={isStartingChat}
+                    className="bg-yellow-500 text-black px-4 py-2 rounded-full text-sm font-medium"
+                  >
+                    {isStartingChat ? "Starting…" : "Chat"}
+                  </button>
+
+                  <FollowButton
+                    userId={searchedUser.id}
+                    token={localStorage.getItem("token")}
+                  />
+                </div>
+              </div>
+            )}
+          </aside>
+
+          {/* ================= FEED ================= */}
+          <main className="flex-1 space-y-12 max-w-2xl">
+
+            {displayedPosts.map((post, index) => (
+              <article
+                key={post.id}
+                ref={
+                  index === displayedPosts.length - 1
+                    ? lastPostElementRef
+                    : null
+                }
+                className="border border-white/10 rounded-3xl overflow-hidden"
+              >
+                {/* HEADER (GLASS BACKGROUND) */}
+                <div className="relative px-5 py-4 flex items-center gap-3">
+                  <div
+                    className="
+                      absolute inset-0
+                      bg-[#161616]/60
+                      supports-[backdrop-filter]:backdrop-blur-md
+                      -z-10
+                    "
+                  />
+                  <div className="relative flex items-center gap-3">
+                    {post.dp?(<img src={post.dp} className="rounded-full w-full h-13"/>):
+                    <img className="rounded-full w-full h-13" src="data:image/jpeg;base64,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"/>
+                    }
+                    
+                    <div>
+                      <p className="font-medium text-sm">
+                        {post.author_name}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {new Date(post.created_at).toLocaleDateString()}
+                      </p>
                     </div>
                   </div>
+                </div>
 
-                  {/* CONTENT */}
-                  {post.content && (
-                    <p className="px-4 pb-3 text-gray-800 text-sm">{post.content}</p>
-                  )}
+                {/* CONTENT (GLASS BACKGROUND) */}
+                {post.content && (
+                  <div className="relative px-5 pb-4">
+                    <div
+                      className="
+                        absolute inset-0
+                        bg-[#161616]/60
+                        supports-[backdrop-filter]:backdrop-blur-md
+                        -z-10
+                      "
+                    />
+                    <p className="relative text-gray-300 font-extrabold font-[Cursive] leading-relaxed">
+                      {post.content}
+                    </p>
+                  </div>
+                )}
 
-                  {/* MEDIA */}
-                  {post.media_url && (
-                    post.media_url.endsWith(".mp4") ? (
-                      <video
-                        src={`https://teen-talks-backend.onrender.com/api/v1${post.media_url}`}
-                        controls
-                        className="w-full aspect-square object-cover bg-black"
-                      />
-                    ) : (
-                      <img
-                        src={`https://teen-talks-backend.onrender.com/api/v1${post.media_url}`}
-                        className="w-full aspect-square object-cover"
-                      />
-                    )
-                  )}
+                {/* MEDIA (SOLID, NO GLASS) */}
+                {post.media_url &&
+                  (post.media_url.endsWith(".mp4") ? (
+                    <video
+                      src={post.media_url}
+                      controls
+                      className="w-full aspect-square object-cover bg-black"
+                    />
+                  ) : (
+                    <img
+                      src={post.media_url}
+                      className="w-full aspect-square object-cover"
+                      alt=""
+                    />
+                  ))}
 
-                  {/* ICONS */}
-                  <div className="px-4 pt-4 flex gap-2 items-center">
+                {/* ACTIONS (GLASS BACKGROUND) */}
+                <div className="relative px-5 py-4 flex items-center gap-6 text-gray-400">
+                  <div
+                    className="
+                      absolute inset-0
+                      bg-[#161616]/60
+                      supports-[backdrop-filter]:backdrop-blur-md
+                      -z-10
+                    "
+                  />
+                  <div className="relative flex  ">
                     <LikeButton postId={post.id} />
-
                     <button
                       onClick={() => toggleComments(post.id)}
-                      className="p-2 rounded-full hover:bg-gray-100"
+                      className=" rounded-full hover:text-yellow-400 transition"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                        viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"
-                        className="size-6">
-                        <path strokeLinecap="round" strokeLinejoin="round"
-                          d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12
-                              c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483
-                              4.483 0 0 1-.923 1.785A5.969 5.969 0 0 0 6 21c1.282 0
-                              2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337Z" />
-                      </svg>
+                      <ChatBubbleOvalLeftIcon className="w-5 h-5 -translate-y-2.5 -translate-x-7" />
                     </button>
                   </div>
-
-                  {expandedPost === post.id && (
-                    <div className="px-4 pb-4 mt-3 bg-gray-50 rounded-xl">
-                      <CommentSection
-                        postId={post.id}
-                        initialLiked={post.liked}
-                        initialCount={post.like_count}
-                      />
-                    </div>
-                  )}
                 </div>
-              );
-            } else {
-              return (
-                <div
-                  key={post.id}
-                  className="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden"
-                >
-                  {/* HEADER */}
-                  <div className="flex items-center justify-between px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gray-200" />
-                      <div>
-                        <h3 className="font-semibold text-gray-900 text-sm">{post.author}</h3>
-                        <p className="text-xs text-gray-500">
-                          {new Date(post.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
+
+                {/* COMMENTS (GLASS BACKGROUND) */}
+                {expandedPost === post.id && (
+                  <div className="relative px-5 pb-5 border-t border-white/5">
+                    <div
+                      className="
+                        absolute inset-0
+                        bg-[#161616]/60
+                        supports-[backdrop-filter]:backdrop-blur-md
+                        -z-10
+                      "
+                    />
+                    <div className="relative">
+                      <CommentSection postId={post.id} />
                     </div>
                   </div>
+                )}
+              </article>
+            ))}
 
-                  {/* CONTENT */}
-                  {post.content && (
-                    <p className="px-4 pb-3 text-gray-800 text-sm">{post.content}</p>
-                  )}
-
-                  {/* MEDIA */}
-                  {post.media_url && (
-                    post.media_url.endsWith(".mp4") ? (
-                      <video
-                        src={`http://localhost:3000/api/v1${post.media_url}`}
-                        controls
-                        className="w-full aspect-square object-cover bg-black"
-                      />
-                    ) : (
-                      <img
-                        src={`http://localhost:3000/api/v1${post.media_url}`}
-                        className="w-full aspect-square object-cover"
-                      />
-                    )
-                  )}
-
-                  {/* ICONS */}
-                  <div className="px-4 pt-4 flex gap-2 items-center">
-                    <LikeButton postId={post.id} />
-
-                    <button
-                      onClick={() => toggleComments(post.id)}
-                      className="p-2 rounded-full hover:bg-gray-100"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                        viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"
-                        className="size-6">
-                        <path strokeLinecap="round" strokeLinejoin="round"
-                          d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12
-                              c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483
-                              4.483 0 0 1-.923 1.785A5.969 5.969 0 0 0 6 21c1.282 0
-                              2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337Z" />
-                      </svg>
-                    </button>
-                  </div>
-
-                  {expandedPost === post.id && (
-                    <div className="px-4 pb-4 mt-3 bg-gray-50 rounded-xl">
-                      <CommentSection
-                        postId={post.id}
-                        initialLiked={post.liked}
-                        initialCount={post.like_count}
-                      />
-                    </div>
-                  )}
-                </div>
-              );
-            }
-
-          })}
-          {isLoadingMore && <div className="text-center py-4 text-gray-500">Loading more posts...</div>}
-          {!hasMore && displayedPosts.length > 0 && <div className="text-center py-4 text-gray-500">You have reached the end!</div>}
+            {isLoadingMore && (
+              <p className="text-center text-gray-500">Loading more…</p>
+            )}
+            {!hasMore && (
+              <p className="text-center text-gray-500">
+                You’ve reached the end
+              </p>
+            )}
+          </main>
         </div>
       </div>
-    </div>
+    </>
   );
-
-
 };
 
 export default FeedPage;

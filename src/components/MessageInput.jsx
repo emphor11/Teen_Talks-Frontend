@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { PaperAirplaneIcon } from "@heroicons/react/24/solid";
 
 export default function MessageInput({ onSend }) {
   const [content, setContent] = useState("");
@@ -14,21 +15,29 @@ export default function MessageInput({ onSend }) {
   };
 
   return (
-    <div className="flex p-3 border-t border-gray-200 bg-white">
+    <div className="flex p-3 border-t  bg-[#212121]">
       <input
         type="text"
         placeholder="Type a message..."
         value={content}
         onChange={(e) => setContent(e.target.value)}
         onKeyPress={handleKeyPress}
-        className="flex-1 border border-gray-300 rounded-full px-4 py-2 outline-none focus:ring-2 focus:ring-pink-400"
+        className=" w-200  font-[Avenir]  text-white bg-white/15 rounded-2xl px-4 py-2 outline-none  "
       />
       <button
-        onClick={handleSend}
-        className="ml-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white px-4 py-2 rounded-full hover:scale-105 transition"
-      >
-        Send
-      </button>
+  type="submit"
+  className="
+    
+    w-11 h-11
+    rounded-full
+    
+    transition
+    disabled:opacity-50
+  "
+  onClick={handleSend}
+>
+  <PaperAirplaneIcon className="w-7 h-7 text-white " />
+</button>
     </div>
   );
 }

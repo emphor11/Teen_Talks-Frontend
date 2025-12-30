@@ -204,17 +204,17 @@ export default function ChatBox({ receiver }) {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 flex items-center space-x-3">
+      <div className="p-4 border-b  bg-[#282828] flex items-center space-x-3">
         <img
           src={receiver?.profile_pic || "/default-avatar.png"}
           alt=""
           className="w-10 h-10 rounded-full object-cover"
         />
-        <h2 className="font-semibold text-gray-800">{receiver?.name}</h2>
+        <h2 className="font-extrabold font-[Avenir] text-white">{receiver?.name}</h2>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-gray-50">
+      <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-[#0F0D0D]">
         {messages.map((msg) => (
           <div
             key={msg.id || `temp-${msg.content}-${msg.created_at}`}
@@ -225,8 +225,8 @@ export default function ChatBox({ receiver }) {
             <div
               className={`p-3 rounded-2xl max-w-xs break-words ${
                 msg.sender_id === user.id
-                  ? "bg-pink-500 text-white"
-                  : "bg-gray-200 text-gray-800"
+                  ? "bg-white font-[Avenir] font-semibold text-black"
+                  : "bg-[#FFFD02] font-[Avenir] font-semibold text-black"
               }`}
             >
               {msg.content}

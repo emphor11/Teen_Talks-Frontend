@@ -1,78 +1,87 @@
 // src/pages/PostTest.jsx
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import PostForm from "../components/PostForm";
-// import LikeButton from "../components/LikeButton";
 import CommentSection from "../components/CommentSection";
+import feedBg from "../assets/feed-bg.jpg";
+import { AuthContext } from "../context/AuthContext";
 
 const PostTest = () => {
-  const [posts, setPosts] = useState([]);
+  const { posts, setPosts } = useContext(AuthContext);
+
+  // LOCAL STATE (for instant preview)
+  const [localPosts, setLocalPosts] = useState([]);
 
   const handlePostCreated = (newPost) => {
-    setPosts([newPost, ...posts]); // add the new post to top
+    // 1️⃣ Update local preview immediately
+    setLocalPosts((prev) => [newPost, ...prev]);
+
+    // 2️⃣ Update global AuthContext
+    const updatedGlobalPosts = [newPost, ...posts];
+    setPosts(updatedGlobalPosts);
+
+    // 3️⃣ Optional: persist (only if you WANT persistence)
+    localStorage.setItem("posts", JSON.stringify(updatedGlobalPosts));
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center px-4 py-10">
-      {/* Header */}
-      <h1 className="text-3xl font-bold text-gray-900 mb-8 tracking-tight">
-        Create a Post
-      </h1>
-  
-      {/* Post Form Container */}
-      <div className="w-full max-w-xl bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
-        <PostForm onPostCreated={handlePostCreated} />
-      </div>
-  
-      {/* Posts Feed */}
-      <div className="w-full max-w-2xl flex flex-col gap-6 mt-10">
-        {posts.map((post) => (
-          <div
-            key={post.id}
-            className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden"
-          >
-            {/* Post Header */}
-            <div className="flex items-center gap-3 p-4">
-              <div className="w-10 h-10 rounded-full bg-gray-200" />
-              <div>
-                <p className="text-gray-900 font-semibold text-sm">You</p>
-                <p className="text-gray-500 text-xs">Just now</p>
+    <>
+      {/* BACKGROUND */}
+      <div
+        className="fixed inset-0 -z-20"
+        style={{
+          backgroundImage: `url(${feedBg})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      />
+
+      {/* CONTENT */}
+      <div className="relative min-h-screen flex flex-col items-center px-4 py-10">
+
+        <h1 className="text-3xl font-bold text-white mb-8">
+          Create a Post
+        </h1>
+
+        {/* POST FORM */}
+        <div className="w-full max-w-xl p-6 bg-[#141414]/65 backdrop-blur-sm border border-white/10 rounded-2xl">
+          <PostForm onPostCreated={handlePostCreated} />
+        </div>
+
+        {/* LOCAL PREVIEW POSTS */}
+        <div className="w-full max-w-2xl flex flex-col gap-6 mt-10 pb-20">
+          {localPosts.map((post) => (
+            <div
+              key={post.id}
+              className="bg-white rounded-2xl shadow-md overflow-hidden"
+            >
+              <p className="p-4 text-gray-800">{post.content}</p>
+
+              {post.media_url && (
+                post.media_url.endsWith(".mp4") ? (
+                  <video
+                    src={post.media_url}
+                    controls
+                    className="w-full aspect-square object-cover"
+                  />
+                ) : (
+                  <img
+                    src={post.media_url}
+                    alt=""
+                    className="w-full aspect-square object-cover"
+                  />
+                )
+              )}
+
+              <div className="p-4">
+                <CommentSection postId={post.id} />
               </div>
             </div>
-  
-            {/* Post Content */}
-            <p className="px-4 text-gray-800 text-sm mb-3">{post.content}</p>
-  
-            {/* Media */}
-            {post.media_url && post.media_url.endsWith(".mp4") ? (
-              <video
-                className="w-full aspect-square object-cover bg-black"
-                controls
-              >
-                <source src={post.media_url} type="video/mp4" />
-              </video>
-            ) : (
-              post.media_url && (
-                <img
-                  className="w-full aspect-square object-cover"
-                  src={post.media_url}
-                  alt="post media"
-                />
-              )
-            )}
-  
-            {/* Divider */}
-            <div className="h-px w-full bg-gray-100 mt-4"></div>
-  
-            {/* Comments */}
-            <div className="p-4">
-              <CommentSection postId={post.id} />
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
+
       </div>
-    </div>
+    </>
   );
-  
 };
 
 export default PostTest;
